@@ -1,6 +1,28 @@
-# Default values for nodejs-app.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+image:
+  repository: us-central1-docker.pkg.dev/nodejs-alptech-project/nodejs-app-repo/nodejs-alptech-app
+  pullPolicy: IfNotPresent
+  tag: "stable"
+
+service:
+  type: LoadBalancer
+  port: 3000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: node.yourdomain.com        # Replace with your real domain
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - node.yourdomain.com          # Same domain
+      secretName: nodejs-app-tls       # TLS secret cert-manager will create
+
 
 replicaCount: 1
 
