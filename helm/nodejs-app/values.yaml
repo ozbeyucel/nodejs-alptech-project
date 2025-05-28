@@ -14,13 +14,13 @@ ingress:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
   hosts:
-    - host: node.yourdomain.com        # Replace with your real domain
+    - host: node.ozbyexpedite.com       # Replace with your real domain
       paths:
         - path: /
           pathType: ImplementationSpecific
   tls:
     - hosts:
-        - node.yourdomain.com          # Same domain
+        - node.ozbyexpedite.com          # Same domain
       secretName: nodejs-app-tls       # TLS secret cert-manager will create
 
 
