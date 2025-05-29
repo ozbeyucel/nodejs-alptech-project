@@ -1,0 +1,47 @@
+name: Deploy to GKE
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+    - name: Set up Docker
+      run: |
+        gcloud auth configure-docker us-central1-docker.pkg.dev
+
+    - name: Build and Push Docker image
+      run: |
+        docker build -t us-central1-docker.pkg.dev/nodejs-alptech-project/nodejs-app-repo/nodejs-alptech-app:$GITHUB_SHA .
+        docker push us-central1-docker.pkg.dev/nodejs-alptech-project/nodejs-app-repo/nodejs-alptech-app:$GITHUB_SHA
+
+    - name: Set up kubectl
+      uses: google-github-actions/get-gke-credentials@v2
+      with:
+        cluster_name: alptech-cluster
+        location: us-central1
+        project_id: nodejs-alptech-project
+
+    - name: Deploy via Helm
+      run: |
+        helm upgrade --install nodejs-app ./helm/nodejs-app \
+          --namespace default \
+          --set image.repository=us-central1-docker.pkg.dev/nodejs-alptech-project/nodejs-app-repo/nodejs-alptech-app \
+          --set image.tag=$GITHUB_SHA
